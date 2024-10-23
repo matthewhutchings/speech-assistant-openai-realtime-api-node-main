@@ -85,7 +85,7 @@ fastify.all('/incoming-call', async (request, reply) => {
                           </Response>`;
 
     reply.type('text/xml').send(twimlResponse);
-
+console.log("sayMessage:" + sayMessage)
     // Send the initial conversation item with the dynamic SayMessage
     sendInitialConversationItem(sayMessage);
 });
@@ -129,11 +129,11 @@ fastify.register(async (fastify) => {
             openAiWs.send(JSON.stringify(sessionUpdate));
 
             // Uncomment the following line to have AI speak first:
-            sendInitialConversationItem();
+            sendInitialConversationItem('hodududu');
         };
 
      // Send initial conversation item if AI talks first
-const sendInitialConversationItem = (sayMessage = 'Hey - How can I help you?"') => {
+const sendInitialConversationItem = () => {
     const initialConversationItem = {
         type: 'conversation.item.create',
         item: {
@@ -142,7 +142,7 @@ const sendInitialConversationItem = (sayMessage = 'Hey - How can I help you?"') 
             content: [
                 {
                     type: 'input_text',
-                    text: 'Greet the user with:' + sayMessage  // Use the dynamic sayMessage here
+                    text: 'Greet the user with our company'  // Use the dynamic sayMessage here
                 }
             ]
         }

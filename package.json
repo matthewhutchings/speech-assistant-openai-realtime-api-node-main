@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@fastify/aws-lambda": "^5.0.0",
     "@fastify/formbody": "^8.0.0",
     "@fastify/websocket": "^11.0.0",
     "dotenv": "^16.4.5",
