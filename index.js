@@ -22,14 +22,13 @@ else
         console.error('OpenAI Key Set');
 
 
-// Load SSL certificates (Update paths if necessary)
+// Load SSL certificates from Let’s Encrypt
 const options = {
     https: {
-        key: fs.readFileSync('/home/ec2-user/selfsigned.key'),
-        cert: fs.readFileSync('/home/ec2-user/selfsigned.crt')
+        key: fs.readFileSync('/etc/letsencrypt/live/node.fewzen.com/privkey.pem'),
+        cert: fs.readFileSync('/etc/letsencrypt/live/node.fewzen.com/fullchain.pem')
     }
 };
-
 const fastify = Fastify(options);
 
 fastify.register(fastifyFormBody);
