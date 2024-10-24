@@ -9,7 +9,6 @@ import WebSocket from 'ws';
 // Load environment variables from .env file
 dotenv.config();
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // Retrieve the OpenAI API key from environment variables.
 const { OPENAI_API_KEY } = process.env;
