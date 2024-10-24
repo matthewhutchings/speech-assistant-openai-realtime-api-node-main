@@ -15,6 +15,9 @@ if (!OPENAI_API_KEY) {
     console.error('Missing OpenAI API key. Please set it in the .env file.');
     process.exit(1);
 }
+else
+        console.error('OpenAI Key Set');
+
 
 // Initialize Fastify
 const fastify = Fastify();
@@ -39,7 +42,7 @@ const LOG_EVENT_TYPES = [
 ];
 
 // Show AI response elapsed timing calculations
-const SHOW_TIMING_MATH = false;
+const SHOW_TIMING_MATH = true;
 
 // Helper function to make the API call to locate profile
 const getProfileInfo = async (phoneNumber) => {
@@ -133,7 +136,9 @@ fastify.register(async (fastify) => {
         };
 
      // Send initial conversation item if AI talks first
-const sendInitialConversationItem = () => {
+        const sendInitialConversationItem = () => {
+    console.log("sendInitialConversationItem")
+
     const initialConversationItem = {
         type: 'conversation.item.create',
         item: {
@@ -148,13 +153,15 @@ const sendInitialConversationItem = () => {
         }
     };
 
-    if (SHOW_TIMING_MATH) console.log('Sending initial conversation item:', JSON.stringify(initialConversationItem));
+    console.log('Sending initial conversation item:', JSON.stringify(initialConversationItem));
     openAiWs.send(JSON.stringify(initialConversationItem));
     openAiWs.send(JSON.stringify({ type: 'response.create' }));
 };
 
         // Handle interruption when the caller's speech starts
         const handleSpeechStartedEvent = () => {
+               console.log("handleSpeechStartedEvent")
+
             if (markQueue.length > 0 && responseStartTimestampTwilio != null) {
                 const elapsedTime = latestMediaTimestamp - responseStartTimestampTwilio;
                 if (SHOW_TIMING_MATH) console.log(`Calculating elapsed time for truncation: ${latestMediaTimestamp} - ${responseStartTimestampTwilio} = ${elapsedTime}ms`);
