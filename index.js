@@ -19,8 +19,16 @@ else
         console.error('OpenAI Key Set');
 
 
-// Initialize Fastify
-const fastify = Fastify();
+// Load SSL certificates (Update paths if necessary)
+const options = {
+    https: {
+        key: fs.readFileSync('/home/ec2-user/selfsigned.key'),
+        cert: fs.readFileSync('/home/ec2-user/selfsigned.crt')
+    }
+};
+
+const fastify = Fastify(options);
+
 fastify.register(fastifyFormBody);
 fastify.register(fastifyWs);
 
@@ -135,28 +143,17 @@ fastify.register(async (fastify) => {
             sendInitialConversationItem();
         };
 
-     // Send initial conversation item if AI talks first
-        const sendInitialConversationItem = () => {
-    console.log("sendInitialConversationItem")
-
-    const initialConversationItem = {
-        type: 'conversation.item.create',
-        item: {
-            type: 'message',
-            role: 'user',
-            content: [
-                {
-                    type: 'input_text',
-                    text: 'Greet the user with our company'  // Use the dynamic sayMessage here
-                }
-            ]
-        }
-    };
-
-    console.log('Sending initial conversation item:', JSON.stringify(initialConversationItem));
-    openAiWs.send(JSON.stringify(initialConversationItem));
-    openAiWs.send(JSON.stringify({ type: 'response.create' }));
+const sendInitialConversationItem = () => {
+    if (openAiWs.readyState === WebSocket.OPEN) {
+        console.log("sendInitialConversationItem");
+        const initialConversationItem = { /* content here */ };
+        openAiWs.send(JSON.stringify(initialConversationItem));
+        openAiWs.send(JSON.stringify({ type: 'response.create' }));
+    } else {
+        console.error("WebSocket is not open, cannot send initial conversation item.");
+    }
 };
+
 
         // Handle interruption when the caller's speech starts
         const handleSpeechStartedEvent = () => {
