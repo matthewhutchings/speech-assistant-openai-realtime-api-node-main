@@ -87,7 +87,7 @@ fastify.all('/incoming-call', async (request, reply) => {
     reply.type('text/xml').send(twimlResponse);
 console.log("sayMessage:" + sayMessage)
     // Send the initial conversation item with the dynamic SayMessage
-    sendInitialConversationItem(sayMessage);
+    sendInitialConversationItem();
 });
 
 
@@ -129,7 +129,7 @@ fastify.register(async (fastify) => {
             openAiWs.send(JSON.stringify(sessionUpdate));
 
             // Uncomment the following line to have AI speak first:
-            sendInitialConversationItem('hodududu');
+            sendInitialConversationItem();
         };
 
      // Send initial conversation item if AI talks first
@@ -295,7 +295,7 @@ const sendInitialConversationItem = () => {
     });
 });
 
-fastify.listen({ port: PORT }, (err) => {
+fastify.listen({ port: 8080, host: '0.0.0.0' }, (err, address) => {
     if (err) {
         console.error(err);
         process.exit(1);
