@@ -2,7 +2,6 @@ import fastifyFormBody from '@fastify/formbody';
 import fastifyWs from '@fastify/websocket';
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
-import fs from 'fs';
 import fetch from 'node-fetch'; // Import node-fetch
 import WebSocket from 'ws';
 
@@ -21,14 +20,7 @@ else
         console.error('OpenAI Key Set');
 
 
-// Load SSL certificates from Let’s Encrypt
-const options = {
-    https: {
-        key: fs.readFileSync('/etc/letsencrypt/live/node.fewzen.com/privkey.pem'),
-        cert: fs.readFileSync('/etc/letsencrypt/live/node.fewzen.com/fullchain.pem')
-    }
-};
-const fastify = Fastify(options);
+const fastify = Fastify();
 
 fastify.register(fastifyFormBody);
 fastify.register(fastifyWs);
@@ -36,7 +28,7 @@ fastify.register(fastifyWs);
 // Constants
 let SYSTEM_MESSAGE = 'Default system message.';
 const VOICE = 'alloy';
-const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
+const PORT = process.env.PORT || 3000; // Allow dynamic port assignment
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
 const LOG_EVENT_TYPES = [
