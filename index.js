@@ -2,6 +2,7 @@ import fastifyFormBody from '@fastify/formbody';
 import fastifyWs from '@fastify/websocket';
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
+import fs from 'fs';
 import fetch from 'node-fetch'; // Import node-fetch
 import WebSocket from 'ws';
 
