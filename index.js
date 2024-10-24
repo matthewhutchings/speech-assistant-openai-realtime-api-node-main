@@ -139,7 +139,20 @@ fastify.register(async (fastify) => {
 const sendInitialConversationItem = () => {
     if (openAiWs.readyState === WebSocket.OPEN) {
         console.log("sendInitialConversationItem");
-        const initialConversationItem = { /* content here */ };
+          const initialConversationItem = {
+        type: 'conversation.item.create',
+        item: {
+            type: 'message',
+            role: 'user',
+            content: [
+                {
+                    type: 'input_text',
+                    text: 'Greet the user with our company'
+                }
+            ]
+        }
+    };
+
         openAiWs.send(JSON.stringify(initialConversationItem));
         openAiWs.send(JSON.stringify({ type: 'response.create' }));
     } else {
