@@ -95,6 +95,30 @@ console.log("sayMessage:" + sayMessage)
 });
 
 
+// Endpoint to make an outgoing call with the assistant
+fastify.post('/make-call', async (request, reply) => {
+    const { phoneNumber } = request.body;
+
+    if (!phoneNumber) {
+        reply.status(400).send({ error: 'Phone number is required.' });
+        return;
+    }
+
+    try {
+        // Initiate the outgoing call
+        const call = await client.calls.create({
+            to: phoneNumber,
+            from: TWILIO_PHONE_NUMBER,
+            url: `https://${request.headers.host}/incoming-call`  // Connect to your assistant's endpoint
+        });
+
+        console.log(`Call initiated with SID: ${call.sid}`);
+        reply.send({ message: 'Call initiated successfully', callSid: call.sid });
+    } catch (error) {
+        console.error('Error initiating call:', error);
+        reply.status(500).send({ error: 'Failed to initiate call' });
+    }
+});
 // WebSocket route for media-stream
 fastify.register(async (fastify) => {
     fastify.get('/media-stream', { websocket: true }, (connection, req) => {
