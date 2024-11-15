@@ -31,7 +31,7 @@ fastify.register(fastifyWs);
 
 // Constants
 let SYSTEM_MESSAGE = 'Default system message.';
-const VOICE = 'nova';
+const VOICE = 'alloy';
 const PORT = process.env.PORT || 3000; // Allow dynamic port assignment
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
