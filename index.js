@@ -3,13 +3,17 @@ import fastifyWs from '@fastify/websocket';
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
 import fetch from 'node-fetch'; // Import node-fetch
+import twilio from 'twilio';
 import WebSocket from 'ws';
+
 
 // Load environment variables from .env file
 dotenv.config();
 
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER } = process.env;
+const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
-// Retrieve the OpenAI API key from environment variables.
+
 const { OPENAI_API_KEY } = process.env;
 
 if (!OPENAI_API_KEY) {
@@ -95,6 +99,30 @@ console.log("sayMessage:" + sayMessage)
 });
 
 
+// Endpoint to make an outgoing call with the assistant
+fastify.post('/make-call', async (request, reply) => {
+    const { phoneNumber } = request.body;
+
+    if (!phoneNumber) {
+        reply.status(400).send({ error: 'Phone number is required.' });
+        return;
+    }
+
+    try {
+        // Initiate the outgoing call
+        const call = await client.calls.create({
+            to: phoneNumber,
+            from: TWILIO_PHONE_NUMBER,
+            url: `https://node.fewzen.com/incoming-call`  // Connect to your assistant's endpoint
+        });
+
+        console.log(`Call initiated with SID: ${call.sid}`);
+        reply.send({ message: 'Call initiated successfully', callSid: call.sid });
+    } catch (error) {
+        console.error('Error initiating call:', error);
+        reply.status(500).send({ error: error});
+    }
+});
 // WebSocket route for media-stream
 fastify.register(async (fastify) => {
     fastify.get('/media-stream', { websocket: true }, (connection, req) => {
