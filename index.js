@@ -3,10 +3,15 @@ import fastifyWs from '@fastify/websocket';
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
 import fetch from 'node-fetch'; // Import node-fetch
+import twilio from 'twilio';
 import WebSocket from 'ws';
+
 
 // Load environment variables from .env file
 dotenv.config();
+
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER } = process.env;
+const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 
 // Retrieve the OpenAI API key from environment variables.
@@ -116,7 +121,7 @@ fastify.post('/make-call', async (request, reply) => {
         reply.send({ message: 'Call initiated successfully', callSid: call.sid });
     } catch (error) {
         console.error('Error initiating call:', error);
-        reply.status(500).send({ error: 'Failed to initiate call' });
+        reply.status(500).send({ error: error});
     }
 });
 // WebSocket route for media-stream
