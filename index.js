@@ -31,7 +31,7 @@ fastify.register(fastifyWs);
 
 // Constants
 let SYSTEM_MESSAGE = 'Default system message.';
-const VOICE = 'onyx';
+const VOICE = 'nova';
 const PORT = process.env.PORT || 3000; // Allow dynamic port assignment
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
@@ -154,9 +154,14 @@ fastify.register(async (fastify) => {
             const sessionUpdate = {
                 type: 'session.update',
                 session: {
-                    turn_detection: { type: 'server_vad' },
-                    input_audio_format: 'g711_ulaw',
-                    output_audio_format: 'g711_ulaw',
+                    turn_detection: {
+                        type: 'server_vad',
+                        threshold: 0.5,
+                        prefix_padding_ms: 300,
+                        silence_duration_ms: 500
+                    },
+                    input_audio_format: 'pcm16',
+                    output_audio_format: 'pcm16',
                     voice: VOICE,
                     instructions: SYSTEM_MESSAGE,  // Use the dynamic SYSTEM_MESSAGE
                     modalities: ["text", "audio"],
