@@ -154,14 +154,9 @@ fastify.register(async (fastify) => {
             const sessionUpdate = {
                 type: 'session.update',
                 session: {
-                    turn_detection: {
-                        type: 'server_vad',
-                        threshold: 0.5,
-                        prefix_padding_ms: 300,
-                        silence_duration_ms: 500
-                    },
-                    input_audio_format: 'pcm16',
-                    output_audio_format: 'pcm16',
+                    turn_detection: { type: 'server_vad' },
+                    input_audio_format: 'g711_ulaw',
+                    output_audio_format: 'g711_ulaw',
                     voice: VOICE,
                     instructions: SYSTEM_MESSAGE,  // Use the dynamic SYSTEM_MESSAGE
                     modalities: ["text", "audio"],
