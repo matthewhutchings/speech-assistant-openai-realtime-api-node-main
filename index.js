@@ -28,6 +28,12 @@ const fastify = Fastify();
 
 fastify.register(fastifyFormBody);
 fastify.register(fastifyWs);
+fastify.register(fastifyCors, {
+    origin: ['https://whatsapp.test', 'https://ai.fewzen.com'], // Replace with actual origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+});
 
 // Constants
 let SYSTEM_MESSAGE = 'Default system message.';
