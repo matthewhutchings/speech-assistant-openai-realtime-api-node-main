@@ -57,17 +57,17 @@ const LOG_EVENT_TYPES = [
 const SHOW_TIMING_MATH = true;
 
 
-fastify.options('*', (request, reply) => {
-    reply
-        .headers({
-            'Access-Control-Allow-Origin': request.headers.origin,
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            'Access-Control-Allow-Credentials': 'true',
-        })
-        .send();
+fastify.options('/make-call', (request, reply) => {
+  reply
+    .headers({
+      'Access-Control-Allow-Origin': 'https://ai.fewzen.com', // Adjust this to match your frontend domain
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Credentials': 'true',
+    })
+    .status(204) // No content for OPTIONS preflight
+    .send();
 });
-
 // Helper function to make the API call to locate profile
 const getProfileInfo = async (phoneNumber) => {
     try {
