@@ -26,15 +26,15 @@ else
 
 
 const fastify = Fastify();
-
-fastify.register(fastifyFormBody);
-fastify.register(fastifyWs);
 fastify.register(fastifyCors, {
     origin: ['https://whatsapp.test', 'https://ai.fewzen.com'], // Replace with actual origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
 });
+fastify.register(fastifyFormBody);
+fastify.register(fastifyWs);
+
 
 // Constants
 let SYSTEM_MESSAGE = 'Default system message.';
@@ -55,6 +55,18 @@ const LOG_EVENT_TYPES = [
 
 // Show AI response elapsed timing calculations
 const SHOW_TIMING_MATH = true;
+
+
+fastify.options('*', (request, reply) => {
+    reply
+        .headers({
+            'Access-Control-Allow-Origin': request.headers.origin,
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Credentials': 'true',
+        })
+        .send();
+});
 
 // Helper function to make the API call to locate profile
 const getProfileInfo = async (phoneNumber) => {
