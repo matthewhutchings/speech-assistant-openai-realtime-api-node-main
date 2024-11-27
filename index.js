@@ -57,17 +57,6 @@ const LOG_EVENT_TYPES = [
 const SHOW_TIMING_MATH = true;
 
 
-fastify.options('*', (request, reply) => {
-    reply
-        .headers({
-            'Access-Control-Allow-Origin': request.headers.origin,
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            'Access-Control-Allow-Credentials': 'true',
-        })
-        .send();
-});
-
 // Helper function to make the API call to locate profile
 const getProfileInfo = async (phoneNumber) => {
     try {
