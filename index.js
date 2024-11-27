@@ -39,7 +39,7 @@ fastify.register(fastifyWs);
 // Constants
 let SYSTEM_MESSAGE = 'Default system message.';
 const VOICE = 'alloy';
-const PORT = process.env.PORT || 3000; // Allow dynamic port assignment
+const PORT = process.env.PORT || 3000; // Dynamic port for Heroku
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
 const LOG_EVENT_TYPES = [
@@ -349,7 +349,7 @@ const sendInitialConversationItem = () => {
     });
 });
 
-fastify.listen({ port: 3000, host: '0.0.0.0' }, (err, address) => {
+fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) {
         console.error(err);
         process.exit(1);
