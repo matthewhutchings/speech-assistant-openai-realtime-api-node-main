@@ -1,30 +1,34 @@
-import { makeCall } from '../services/twilio-service.js';
+import { WEBSOCKET_HOST } from '../config/environment.js';
+import { twilioClient } from '../services/twilio-client.js';
 
 export default async function makeCallRoutes(fastify) {
     fastify.post('/make-call', async (request, reply) => {
+        const { phoneNumber: to, twilioNumber: from } = request.body;
+
+        if (!to || !from) {
+            reply.status(400).send({ error: 'Both "to" and "from" phone numbers are required.' });
+            return;
+        }
+
+        if (typeof to !== 'string' || typeof from !== 'string') {
+            reply.status(400).send({ error: 'Both "to" and "from" phone numbers must be strings.' });
+            return;
+        }
+
+        console.log(`Making call from ${from} to ${to}`);
+
         try {
-            // Extract and validate input
-            const { phoneNumber, twilioNumber } = request.body;
-            if (!phoneNumber || !twilioNumber) {
-                return reply.status(400).send({ error: 'Phone number and Twilio number are required.' });
-            }
-
-            // Initiate the call
-            const callSid = await makeCall(phoneNumber, twilioNumber);
-
-            // Send a successful response
-            reply.send({
-                message: 'Call initiated successfully',
-                callSid,
+            const call = await twilioClient.calls.create({
+                to,
+                from,
+                url: `https://${WEBSOCKET_HOST}/incoming-call`,
             });
+
+            console.log(`Call initiated successfully: ${call.sid}`);
+            reply.send({ message: 'Call initiated successfully', callSid: call.sid });
         } catch (error) {
-            console.error('Error initiating call:', error);
-
-            // Respond with an error
-            reply.status(500).send({
-                error: 'Failed to initiate call.',
-                details: error.message, // Optionally include error details for debugging
-            });
+            console.error('Twilio makeCall error:', error);
+            reply.status(500).send({ error: `Failed to make call with Twilio. ${error.message}` });
         }
     });
 }

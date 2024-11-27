@@ -19,7 +19,7 @@ export default async function incomingCallRoutes(fastify) {
             const twimlResponse = `
                 <?xml version="1.0" encoding="UTF-8"?>
                 <Response>
-                    <Record transcribe="true" transcribeCallback="https://your-api.com/transcription-callback" />
+                    <Record transcribe="true" transcribeCallback="https://ai.fewzen.com/transcription-callback" />
                     <Connect>
                         <Stream url="wss://${websocketHost}/media-stream">
                             <Parameter name="track" value="both" />
