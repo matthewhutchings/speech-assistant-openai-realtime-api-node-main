@@ -6,7 +6,10 @@ export default async function incomingCallRoutes(fastify) {
     fastify.all('/incoming-call', async (request, reply) => {
         try {
             const phoneNumber = request.body?.To || '';
-            const profileInfo = await getProfileInfo(phoneNumber);
+            const twilioNumber = process.env.TWILIO_PHONE_NUMBER; // Set Twilio number dynamically
+
+            const profileInfo = await getProfileInfo(phoneNumber, twilioNumber);
+
 
             let sayMessage = 'Hey - How can I help you?';
             if (profileInfo?.SayMessage) {
