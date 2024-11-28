@@ -1,17 +1,16 @@
 import { WEBSOCKET_HOST } from '../config/environment.js';
-import { twilioClient } from './twilio-client.js'; // Updated to separate client initialization
+import { twilioClient } from './twilio-client.js';
 
-// Twilio call function
-export async function makeCall(to, from) {
+export async function makeCall(to, from, direction = 'outgoing') {
     try {
         const call = await twilioClient.calls.create({
             to,
             from,
-            url: `https://${WEBSOCKET_HOST}/incoming-call`, // Ensure WEBSOCKET_HOST is properly configured
+            url: `https://${WEBSOCKET_HOST}/incoming-call?direction=${encodeURIComponent(direction)}`,
         });
         return call.sid;
     } catch (error) {
         console.error('Twilio makeCall error:', error);
-        throw new Error('Failed to make call with Twilio.'); // Rethrow for route handling
+        throw new Error(`Failed to make call with Twilio: ${error.message}`);
     }
 }
