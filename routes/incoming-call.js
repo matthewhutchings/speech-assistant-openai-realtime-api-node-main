@@ -39,7 +39,7 @@ export default async function incomingCallRoutes(fastify) {
             const profileInfo = await getProfileInfo(phoneNumber, twilioNumber, direction);
 
             // Generate a unique session ID
-            const sessionId = `${phoneNumber}-${Date.now()}`;
+            const sessionId = `${phoneNumber.replace(/\+/g, '')}-${Date.now()}`;
 
             // Store profile info in Redis with a 5-minute expiration
             await redisClient.set(sessionId, JSON.stringify(profileInfo), { EX: 300 });
@@ -54,11 +54,15 @@ export default async function incomingCallRoutes(fastify) {
 
             const websocketHost = process.env.WEBSOCKET_HOST || request.headers.host;
 
+            const websocketUrl = `wss://${websocketHost}/media-stream/${sessionId}`;
+console.log('Generated WebSocket URL:', websocketUrl);
+
             // Generate TwiML response with the sessionId
             const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Connect>
-        <Stream url="wss://${websocketHost}/media-stream?sessionId=${sessionId}">
+        <Stream url="${websocketUrl}">
+                    <Parameter name="sessionid" value="447716427509-1732825429005"/>
         </Stream>
     </Connect>
 </Response>`.trim();
