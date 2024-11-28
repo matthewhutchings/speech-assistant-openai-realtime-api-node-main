@@ -18,13 +18,17 @@ export default async function incomingCallRoutes(fastify) {
 
             const websocketHost = process.env.WEBSOCKET_HOST || request.headers.host;
 
-        // Properly formatted TwiML response with no blank lines
+        // TwiML response with recording and transcription
         const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
+    <Record transcribe="true" transcribeCallback="https://node.fewzen.com/transcription-callback" />
     <Connect>
-        <Stream url="wss://${websocketHost}/media-stream" />
+        <Stream url="wss://${websocketHost}/media-stream">
+            <Parameter name="track" value="both" />
+            <Parameter name="record" value="true" />
+        </Stream>
     </Connect>
-</Response>`.trim(); // Trim to ensure no blank lines or extra spaces
+</Response>`.trim();
 
             reply.type('text/xml').send(twimlResponse);
            // console.log("sayMessage:", sayMessage);
