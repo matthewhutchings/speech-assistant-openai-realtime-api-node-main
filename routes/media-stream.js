@@ -4,7 +4,7 @@ import { OPENAI_API_KEY } from '../config/environment.js';
 import { sendInitialConversationItem } from '../utils/websocket-helpers.js';
 
 // Initialize Redis client
-const redisClient = createClient();
+const redisClient = createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
 
 (async () => {
     try {
