@@ -21,7 +21,6 @@ export default async function incomingCallRoutes(fastify) {
         // TwiML response with recording and transcription
         const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Record transcribe="true" transcribeCallback="https://node.fewzen.com/transcription-callback" />
     <Connect>
         <Stream url="wss://${websocketHost}/media-stream">
         </Stream>
@@ -29,7 +28,7 @@ export default async function incomingCallRoutes(fastify) {
 </Response>`.trim();
 
             reply.type('text/xml').send(twimlResponse);
-           // console.log("sayMessage:", sayMessage);
+            console.log("sayMessage:", sayMessage);
 
             // Create WebSocket connection to OpenAI or your backend service
             const openAiWs = new WebSocket('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01', {
