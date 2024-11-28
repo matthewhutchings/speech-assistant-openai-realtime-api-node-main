@@ -62,7 +62,6 @@ console.log('Generated WebSocket URL:', websocketUrl);
 <Response>
     <Connect>
         <Stream url="${websocketUrl}">
-                    <Parameter name="sessionid" value="447716427509-1732825429005"/>
         </Stream>
     </Connect>
 </Response>`.trim();
