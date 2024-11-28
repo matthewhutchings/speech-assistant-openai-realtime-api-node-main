@@ -5,8 +5,13 @@ import { sendInitialConversationItem } from '../utils/websocket-helpers.js';
 
 
 // Initialize Redis client globally to ensure a single connection
-const redisClient = createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
-
+const redisClient = createClient({
+    url: process.env.REDISCLOUD_URL,
+    socket: {
+        tls: false, // Enable TLS for secure connection to Redis Cloud
+        rejectUnauthorized: false, // Accept self-signed certificates if necessary
+    },
+});
 // Connect the Redis client once during application startup
 (async () => {
     try {

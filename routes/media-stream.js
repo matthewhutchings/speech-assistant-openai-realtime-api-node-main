@@ -4,8 +4,13 @@ import { OPENAI_API_KEY } from '../config/environment.js';
 import { sendInitialConversationItem } from '../utils/websocket-helpers.js';
 
 // Initialize Redis client
-const redisClient = createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
-
+const redisClient = createClient({
+    url: process.env.REDISCLOUD_URL,
+    socket: {
+        tls: false, // Enable TLS for secure connection to Redis Cloud
+        rejectUnauthorized: false, // Accept self-signed certificates if necessary
+    },
+});
 (async () => {
     try {
         await redisClient.connect();
