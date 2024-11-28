@@ -18,12 +18,12 @@ export default async function makeCallRoutes(fastify) {
         console.log(`Making call from ${from} to ${to}`);
 
         try {
+
             const call = await twilioClient.calls.create({
                 to,
                 from,
-                url: `https://${WEBSOCKET_HOST}/incoming-call`,
+                url: `https://${WEBSOCKET_HOST}/incoming-call?direction=outgoing}`,
             });
-
             console.log(`Call initiated successfully: ${call.sid}`);
             reply.send({ message: 'Call initiated successfully', callSid: call.sid });
         } catch (error) {

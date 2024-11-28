@@ -7,8 +7,8 @@ export default async function incomingCallRoutes(fastify) {
         try {
             const phoneNumber = request.body?.To || '';
             const twilioNumber = process.env.TWILIO_PHONE_NUMBER; // Set Twilio number dynamically
-
-            const profileInfo = await getProfileInfo(phoneNumber, twilioNumber);
+            const direction = request.query?.direction || 'incoming';
+            const profileInfo = await getProfileInfo(phoneNumber, twilioNumber, direction);
 
 
             let sayMessage = 'Hey - How can I help you?';
@@ -19,7 +19,7 @@ export default async function incomingCallRoutes(fastify) {
             const websocketHost = process.env.WEBSOCKET_HOST || request.headers.host;
 
         // TwiML response with recording and transcription
-        const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
+    const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Connect>
         <Stream url="wss://${websocketHost}/media-stream">

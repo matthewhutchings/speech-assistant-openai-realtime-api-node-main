@@ -1,13 +1,13 @@
 import fetch from 'node-fetch';
 
-export async function getProfileInfo(phoneNumber, twilioNumber) {
+export async function getProfileInfo(phoneNumber, twilioNumber, direction) {
     try {
-        console.log(`Fetching profile info for phoneNumber: ${phoneNumber}, twilioNumber: ${twilioNumber}`);
+        console.log(`Fetching profile info for phoneNumber: ${phoneNumber}, twilioNumber: ${twilioNumber}, direction: ${direction}`);
 
         const response = await fetch('https://ai.fewzen.com/api/locate-profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phoneNumber, twilioNumber }),
+            body: JSON.stringify({ phoneNumber, twilioNumber, direction }),
         });
 
         const contentType = response.headers.get('content-type');
