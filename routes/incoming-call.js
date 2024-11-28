@@ -24,8 +24,6 @@ export default async function incomingCallRoutes(fastify) {
     <Record transcribe="true" transcribeCallback="https://node.fewzen.com/transcription-callback" />
     <Connect>
         <Stream url="wss://${websocketHost}/media-stream">
-            <Parameter name="track" value="both" />
-            <Parameter name="record" value="true" />
         </Stream>
     </Connect>
 </Response>`.trim();
