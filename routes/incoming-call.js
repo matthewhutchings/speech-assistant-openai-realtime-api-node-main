@@ -3,14 +3,15 @@ import { WebSocket } from 'ws';
 import { getProfileInfo } from '../services/profile-service.js';
 import { sendInitialConversationItem } from '../utils/websocket-helpers.js';
 
+
 // Initialize Redis client globally to ensure a single connection
-const redisClient = createClient();
+const redisClient = createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
 
 // Connect the Redis client once during application startup
 (async () => {
     try {
         await redisClient.connect();
-        console.log('Connected to Redis');
+        console.log('Incoming Call Connected to Redis');
     } catch (err) {
         console.error('Error connecting to Redis:', err);
         process.exit(1); // Exit if Redis connection fails

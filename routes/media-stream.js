@@ -24,7 +24,11 @@ export default async function mediaStreamRoutes(fastify) {
 
         let sessionId;
         try {
+
+            console.log("url is" + req.url)
             const url = new URL(req.url, `https://${req.headers.host}`);
+
+            console.log(url)
             sessionId = url.searchParams.get('sessionId');
             if (!sessionId) {
                 console.error('No sessionId provided. Closing connection.');
@@ -40,6 +44,8 @@ export default async function mediaStreamRoutes(fastify) {
 
         // Fetch profile info from Redis
         let profileInfo;
+
+        console.log("The media stream sessionID is: " + sessionId)
         try {
             const profileInfoJson = await redisClient.get(sessionId);
             if (!profileInfoJson) {
