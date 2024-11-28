@@ -18,18 +18,16 @@ export default async function incomingCallRoutes(fastify) {
 
             const websocketHost = process.env.WEBSOCKET_HOST || request.headers.host;
 
-            // TwiML response with recording and transcription enabled
-            const twimlResponse = `
-                <?xml version="1.0" encoding="UTF-8"?>
-                <Response>
-                    <Connect>
-                        <Stream url="wss://${websocketHost}/media-stream" />
-                    </Connect>
-                </Response>
-            `;
+        // Properly formatted TwiML response with no blank lines
+        const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Connect>
+        <Stream url="wss://${websocketHost}/media-stream" />
+    </Connect>
+</Response>`.trim(); // Trim to ensure no blank lines or extra spaces
 
             reply.type('text/xml').send(twimlResponse);
-            console.log("sayMessage:", sayMessage);
+           // console.log("sayMessage:", sayMessage);
 
             // Create WebSocket connection to OpenAI or your backend service
             const openAiWs = new WebSocket('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01', {
