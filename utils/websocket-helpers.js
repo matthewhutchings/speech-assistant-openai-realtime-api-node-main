@@ -1,8 +1,13 @@
 import WebSocket from 'ws';
+import { OPENAI_API_KEY } from '../config/environment.js';
 
+// Utility function to get current timestamp for logs
+const getTimestamp = () => new Date().toISOString();
+
+// Function to send the initial conversation item
 export function sendInitialConversationItem(openAiWs) {
     if (openAiWs.readyState === WebSocket.OPEN) {
-        console.log('Sending initial conversation item to OpenAI...');
+        console.log(`[${getTimestamp()}] WebSocket connection is open. Preparing to send initial conversation item to OpenAI...`);
 
         const initialConversationItem = {
             type: 'conversation.item.create',
@@ -18,19 +23,32 @@ export function sendInitialConversationItem(openAiWs) {
             },
         };
 
-        // Send the initial conversation item to OpenAI
-        openAiWs.send(JSON.stringify(initialConversationItem));
+        try {
+            console.log(`[${getTimestamp()}] Initial conversation item payload:`, JSON.stringify(initialConversationItem, null, 2));
 
-        // Optionally request a response from OpenAI
-        openAiWs.send(JSON.stringify({ type: 'response.create' }));
+            // Send the initial conversation item
+            openAiWs.send(JSON.stringify(initialConversationItem));
+            console.log(`[${getTimestamp()}] Initial conversation item sent successfully.`);
+
+            // Optionally request a response
+            const responseRequest = { type: 'response.create' };
+            console.log(`[${getTimestamp()}] Requesting response from OpenAI:`, JSON.stringify(responseRequest, null, 2));
+            openAiWs.send(JSON.stringify(responseRequest));
+            console.log(`[${getTimestamp()}] Response request sent successfully.`);
+        } catch (error) {
+            console.error(`[${getTimestamp()}] Error sending initial conversation item or response request:`, error.message);
+            console.error(`[${getTimestamp()}] Stack trace:`, error.stack);
+        }
     } else {
-        console.error('OpenAI WebSocket is not open, cannot send initial conversation item.');
+        console.error(
+            `[${getTimestamp()}] Failed to send initial conversation item. OpenAI WebSocket is not open. Current readyState: ${openAiWs.readyState}`
+        );
     }
 }
 
-
-export function handleWebSocketConnection(connection, req, OPENAI_API_KEY, SYSTEM_MESSAGE, VOICE) {
-    console.log('Handling WebSocket connection with client...');
+// Function to handle WebSocket connection
+export function handleWebSocketConnection(connection, req, SYSTEM_MESSAGE, VOICE) {
+    console.log(`[${getTimestamp()}] Handling WebSocket connection with client...`);
 
     let streamSid = null;
     let latestMediaTimestamp = 0;
@@ -38,7 +56,7 @@ export function handleWebSocketConnection(connection, req, OPENAI_API_KEY, SYSTE
     let markQueue = [];
     let responseStartTimestampTwilio = null;
 
-    // Connect to OpenAI's WebSocket API
+    // OpenAI WebSocket
     const openAiWs = new WebSocket('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01', {
         headers: {
             Authorization: `Bearer ${OPENAI_API_KEY}`,
@@ -55,66 +73,85 @@ export function handleWebSocketConnection(connection, req, OPENAI_API_KEY, SYSTE
                 input_audio_format: 'g711_ulaw',
                 output_audio_format: 'g711_ulaw',
                 voice: VOICE,
-                instructions: SYSTEM_MESSAGE,
+                instructions: "test",
                 modalities: ['text', 'audio'],
                 temperature: 0.8,
             },
         };
 
-        console.log('Preparing to initialize OpenAI session...');
-        console.log('Session Update Payload:', JSON.stringify(sessionUpdate, null, 2));
+        console.log(`[${getTimestamp()}] Preparing to initialize OpenAI session.`);
+        console.log(`[${getTimestamp()}] Session Update Payload:`, JSON.stringify(sessionUpdate, null, 2));
 
-        openAiWs.send(JSON.stringify(sessionUpdate));
-        console.log('Session update sent to OpenAI.');
-        sendInitialConversationItem(openAiWs);
+        try {
+            openAiWs.send(JSON.stringify(sessionUpdate));
+            console.log(`[${getTimestamp()}] Session update sent to OpenAI.`);
+            sendInitialConversationItem(openAiWs);
+        } catch (error) {
+            console.error(`[${getTimestamp()}] Error during OpenAI session initialization:`, error.message);
+        }
     };
 
     // Listen for OpenAI WebSocket messages
     openAiWs.on('message', (data) => {
+        console.log(`[${getTimestamp()}] Message received from OpenAI:`, data);
+
         try {
             const response = JSON.parse(data);
-            console.log('Message received from OpenAI:', JSON.stringify(response, null, 2));
 
-            // Process OpenAI response
             if (response.type === 'response.audio.delta' && response.delta) {
-                console.log('Processing audio delta from OpenAI...');
+                console.log(`[${getTimestamp()}] Processing audio delta from OpenAI...`);
                 const audioDelta = {
                     event: 'media',
                     streamSid,
                     media: { payload: Buffer.from(response.delta, 'base64').toString('base64') },
                 };
                 connection.send(JSON.stringify(audioDelta));
-                console.log('Audio delta sent to client.');
+                console.log(`[${getTimestamp()}] Audio delta sent to client.`);
 
                 if (!responseStartTimestampTwilio) {
                     responseStartTimestampTwilio = latestMediaTimestamp;
-                    console.log(`Response start timestamp set: ${responseStartTimestampTwilio}`);
+                    console.log(`[${getTimestamp()}] Response start timestamp set: ${responseStartTimestampTwilio}`);
                 }
 
                 if (response.item_id) {
                     lastAssistantItem = response.item_id;
-                    console.log(`Last assistant item updated: ${lastAssistantItem}`);
+                    console.log(`[${getTimestamp()}] Last assistant item updated: ${lastAssistantItem}`);
                 }
             }
 
             if (response.type === 'input_audio_buffer.speech_started') {
-                console.log('Speech started event detected.');
+                console.log(`[${getTimestamp()}] Speech started event detected.`);
                 handleSpeechStartedEvent(connection, latestMediaTimestamp, responseStartTimestampTwilio, lastAssistantItem, markQueue, openAiWs);
             }
         } catch (error) {
-            console.error('Error processing OpenAI message:', error);
+            console.error(`[${getTimestamp()}] Error processing OpenAI message:`, error.message);
         }
     });
 
-    // Handle incoming WebSocket messages from the client
+    // Handle OpenAI WebSocket events
+    openAiWs.on('open', () => {
+        console.log(`[${getTimestamp()}] Connected to OpenAI Realtime API.`);
+        initializeOpenAiSession();
+    });
+
+    openAiWs.on('close', (code, reason) => {
+        console.log(`[${getTimestamp()}] Disconnected from OpenAI Realtime API. Code: ${code}, Reason: ${reason}`);
+    });
+
+    openAiWs.on('error', (error) => {
+        console.error(`[${getTimestamp()}] Error in OpenAI WebSocket:`, error.message);
+    });
+
+    // Handle client WebSocket events
     connection.on('message', (message) => {
+        console.log(`[${getTimestamp()}] Message received from client:`, message);
+
         try {
             const data = JSON.parse(message);
-            console.log('Message received from client:', JSON.stringify(data, null, 2));
 
             if (data.event === 'media') {
                 latestMediaTimestamp = data.media.timestamp;
-                console.log(`Received media timestamp: ${latestMediaTimestamp}`);
+                console.log(`[${getTimestamp()}] Received media timestamp: ${latestMediaTimestamp}`);
 
                 if (openAiWs.readyState === WebSocket.OPEN) {
                     const audioAppend = {
@@ -122,75 +159,31 @@ export function handleWebSocketConnection(connection, req, OPENAI_API_KEY, SYSTE
                         audio: data.media.payload,
                     };
                     openAiWs.send(JSON.stringify(audioAppend));
-                    console.log('Media payload sent to OpenAI.');
+                    console.log(`[${getTimestamp()}] Media payload sent to OpenAI.`);
                 }
             }
 
             if (data.event === 'start') {
                 streamSid = data.start.streamSid;
-                console.log(`Stream started with SID: ${streamSid}`);
+                console.log(`[${getTimestamp()}] Stream started with SID: ${streamSid}`);
                 responseStartTimestampTwilio = null;
                 latestMediaTimestamp = 0;
-                console.log('Media timestamp and response start timestamp reset.');
+                console.log(`[${getTimestamp()}] Media timestamp and response start timestamp reset.`);
             }
         } catch (error) {
-            console.error('Error parsing client message:', error);
+            console.error(`[${getTimestamp()}] Error parsing client message:`, error.message);
         }
     });
 
-    // Handle OpenAI WebSocket events
-    openAiWs.on('open', () => {
-        console.log('Connected to OpenAI Realtime API.');
-        initializeOpenAiSession();
-    });
-
-    openAiWs.on('close', (code, reason) => {
-        console.log(`Disconnected from OpenAI Realtime API. Code: ${code}, Reason: ${reason}`);
-    });
-
-    openAiWs.on('error', (error) => {
-        console.error('Error in OpenAI WebSocket:', error.message);
-    });
-
-    // Handle connection close
     connection.on('close', () => {
+        console.log(`[${getTimestamp()}] Client WebSocket disconnected.`);
         if (openAiWs.readyState === WebSocket.OPEN) {
             openAiWs.close();
-            console.log('OpenAI WebSocket closed due to client disconnection.');
+            console.log(`[${getTimestamp()}] OpenAI WebSocket closed.`);
         }
-        console.log('Client WebSocket disconnected.');
     });
 
-    // Handle connection error
     connection.on('error', (error) => {
-        console.error('WebSocket connection error:', error.message);
+        console.error(`[${getTimestamp()}] Client WebSocket error:`, error.message);
     });
-}
-
-function handleSpeechStartedEvent(connection, latestMediaTimestamp, responseStartTimestampTwilio, lastAssistantItem, markQueue, openAiWs) {
-    console.log('Handling speech started event...');
-    if (markQueue.length > 0 && responseStartTimestampTwilio != null) {
-        const elapsedTime = latestMediaTimestamp - responseStartTimestampTwilio;
-        console.log(`Elapsed time for truncation: ${elapsedTime}ms`);
-
-        if (lastAssistantItem) {
-            const truncateEvent = {
-                type: 'conversation.item.truncate',
-                item_id: lastAssistantItem,
-                content_index: 0,
-                audio_end_ms: elapsedTime,
-            };
-            openAiWs.send(JSON.stringify(truncateEvent));
-            console.log('Truncate event sent to OpenAI:', JSON.stringify(truncateEvent, null, 2));
-        }
-
-        connection.send(JSON.stringify({ event: 'clear', streamSid: null }));
-        console.log('Clear event sent to client.');
-        markQueue.length = 0;
-        lastAssistantItem = null;
-        responseStartTimestampTwilio = null;
-        console.log('Mark queue and timestamps reset.');
-    } else {
-        console.log('No mark queue items or response start timestamp available. Skipping truncation.');
-    }
 }

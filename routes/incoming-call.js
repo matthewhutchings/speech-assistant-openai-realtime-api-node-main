@@ -1,5 +1,6 @@
 import { createClient } from 'redis';
 import { WebSocket } from 'ws';
+import { OPENAI_API_KEY } from '../config/environment.js';
 import { getProfileInfo } from '../services/profile-service.js';
 import { sendInitialConversationItem } from '../utils/websocket-helpers.js';
 
@@ -72,7 +73,7 @@ console.log('Generated WebSocket URL:', websocketUrl);
             // Create WebSocket connection to OpenAI or your backend service
             const openAiWs = new WebSocket('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01', {
                 headers: {
-                    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+                    Authorization: `Bearer ${OPENAI_API_KEY}`,
                     'OpenAI-Beta': 'realtime=v1',
                 },
             });
