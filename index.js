@@ -7,6 +7,7 @@ import { PORT } from './config/environment.js';
 import incomingCallRoutes from './routes/incoming-call.js';
 import indexRoute from './routes/index-route.js';
 import makeCallRoutes from './routes/make-call.js';
+import mediaStreamRoutes from './routes/media-stream.js';
 
 const fastify = Fastify();
 
@@ -25,6 +26,8 @@ fastify.register(fastifyWs);
 fastify.register(indexRoute);
 fastify.register(incomingCallRoutes);
 fastify.register(makeCallRoutes);
+fastify.register(mediaStreamRoutes);
+
 
 // Start the server
 fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
