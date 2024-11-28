@@ -22,15 +22,10 @@ export default async function incomingCallRoutes(fastify) {
             const twimlResponse = `
                 <?xml version="1.0" encoding="UTF-8"?>
                 <Response>
-                    <Record transcribe="true" transcribeCallback="https://ai.fewzen.com/transcription-callback" />
-                    <Connect>
-                        <Stream url="wss://${websocketHost}/media-stream">
-                            <Parameter name="track" value="both" />
-                            <Parameter name="record" value="true" />
-                        </Stream>
-                    </Connect>
-                </Response>
-            `;
+                          <Connect>
+                              <Stream url="wss://${websocketHost}/media-stream" />
+                          </Connect>
+                      </Response>`;
 
             reply.type('text/xml').send(twimlResponse);
             console.log("sayMessage:", sayMessage);
